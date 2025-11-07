@@ -1,35 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasks - ToDo App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tasks - ToDo App</title>
+  <link rel="stylesheet" href="css/style.css" />
 
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/tasks.js" defer></script>
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="js/firebase-init.js"></script>
+  <script src="js/tasks.js" defer></script>
 </head>
 <body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <h2>Projects</h2>
+      <ul id="project-sidebar-list"></ul>
+      <button onclick="window.location.href='projects.html'" id="back-btn">⬅ Back</button>
+      <button id="logout-btn" class="logout">Logout</button>
+    </aside>
 
-    <div class="app-container">
-
-        <aside class="sidebar">
-            <h2>Projects</h2>
-            <button onclick="window.location.href='projects.html'">⬅ Back</button>
-            <button id="logout-btn" class="logout">Logout</button>
-        </aside>
-
-        <main class="main-content">
-            <h1 id="project-name"></h1>
-
-            <div class="task-input">
-                <input type="text" id="task-input" placeholder="Enter new task...">
-                <button id="add-task-btn">Add Task</button>
-            </div>
-
-            <ul id="task-list"></ul>
-        </main>
-
-    </div>
-
+    <main class="main-content">
+      <h1 id="project-name"></h1>
+      <div class="task-input">
+        <input type="text" id="task-input" placeholder="Enter new task..." />
+        <button id="add-task-btn">Add Task</button>
+      </div>
+      <ul id="task-list"></ul>
+    </main>
+  </div>
 </body>
 </html>

@@ -1,33 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projects - ToDo App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects - ToDo App</title>
+  <link rel="stylesheet" href="css/style.css" />
 
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/projects.js" defer></script>
+  <!-- Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script src="js/firebase-init.js"></script>
+  <script src="js/projects.js" defer></script>
 </head>
 <body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <h2>Your Projects</h2>
+      <ul id="project-list"></ul>
+      <button id="add-project-btn">+ Add Project</button>
+      <button id="logout-btn" class="logout">Logout</button>
+    </aside>
 
-    <div class="app-container">
-
-        <!-- LEFT SIDEBAR -->
-        <aside class="sidebar">
-            <h2>Your Projects</h2>
-            <ul id="project-list"></ul>
-
-            <button id="add-project-btn">+ Add Project</button>
-            <button id="logout-btn" class="logout">Logout</button>
-        </aside>
-
-        <!-- RIGHT CONTENT BOX -->
-        <main class="main-content">
-            <h1>Select a project</h1>
-            <p>Click a project to see tasks</p>
-        </main>
-
-    </div>
-
+    <main class="main-content">
+      <h1>Select a Project</h1>
+      <p>Click a project to view tasks</p>
+    </main>
+  </div>
 </body>
 </html>

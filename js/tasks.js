@@ -1,46 +1,56 @@
+const auth = firebase.auth();
+const db = firebase.firestore();
+
 const logoutBtn = document.querySelector("#logout-btn");
 const projectNameEl = document.querySelector("#project-name");
 const taskList = document.querySelector("#task-list");
 const addTaskBtn = document.querySelector("#add-task-btn");
 const taskInput = document.querySelector("#task-input");
+const sidebarList = document.querySelector("#project-sidebar-list");
 
-const currentUser = localStorage.getItem("currentUser");
 const currentProject = localStorage.getItem("currentProject");
-
-if (!currentUser) window.location.href = "login.html";
 if (!currentProject) window.location.href = "projects.html";
-
-function getUsers() {
-  return JSON.parse(localStorage.getItem("users")) || [];
-}
-function saveUsers(users) {
-  localStorage.setItem("users", JSON.stringify(users));
-}
-function getUserIndex(users) {
-  return users.findIndex(u => u.username === currentUser);
-}
-function getTasksRef() {
-
-  const users = getUsers();
-  const ui = getUserIndex(users);
-  if (ui === -1) {
-   
-    localStorage.removeItem("currentUser");
-    window.location.href = "login.html";
-  }
-  const user = users[ui];
-  
-  user.projects = user.projects || {};
-  user.projects[currentProject] = user.projects[currentProject] || [];
-  const tasks = user.projects[currentProject];
-  return { users, ui, user, tasks };
-}
-
 projectNameEl.textContent = currentProject;
 
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+  await loadSidebarProjects(user);
+  await loadTasks(user);
+});
 
-function loadTasks() {
-  const { tasks } = getTasksRef();
+// Load sidebar projects
+async function loadSidebarProjects(user) {
+  const userRef = db.collection("users").doc(user.email);
+  const doc = await userRef.get();
+  if (!doc.exists) return;
+  const data = doc.data();
+  const projects = Object.keys(data.projects);
+  sidebarList.innerHTML = "";
+
+  projects.forEach(project => {
+    const li = document.createElement("li");
+    li.textContent = project;
+    li.classList.add("sidebar-project");
+    if (project === currentProject) li.classList.add("active-project");
+
+    li.addEventListener("click", () => {
+      localStorage.setItem("currentProject", project);
+      window.location.reload();
+    });
+
+    sidebarList.appendChild(li);
+  });
+}
+
+// Load tasks
+async function loadTasks(user) {
+  const userRef = db.collection("users").doc(user.email);
+  const doc = await userRef.get();
+  const data = doc.data();
+  const tasks = data.projects[currentProject] || [];
   taskList.innerHTML = "";
 
   tasks.forEach((task, index) => {
@@ -51,56 +61,56 @@ function loadTasks() {
     checkbox.type = "checkbox";
     checkbox.className = "task-checkbox";
     checkbox.checked = !!task.completed;
-
-    checkbox.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const { users, tasks } = getTasksRef();
+    checkbox.addEventListener("click", async () => {
       tasks[index].completed = checkbox.checked;
-      saveUsers(users);
-      loadTasks();
+      data.projects[currentProject] = tasks;
+      await userRef.set(data);
+      loadTasks(user);
     });
 
-    // text
     const textSpan = document.createElement("span");
     textSpan.className = "task-text";
     textSpan.textContent = task.text;
 
-    // delete button
-    const del = document.createElement("button");
-    del.className = "delete-btn";
-    del.textContent = "🗑";
-    del.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const { users, tasks } = getTasksRef();
+    const delBtn = document.createElement("button");
+    delBtn.className = "delete-btn";
+    delBtn.textContent = "🗑";
+    delBtn.addEventListener("click", async () => {
       tasks.splice(index, 1);
-      saveUsers(users);
-      loadTasks();
+      data.projects[currentProject] = tasks;
+      await userRef.set(data);
+      loadTasks(user);
     });
 
     li.appendChild(checkbox);
     li.appendChild(textSpan);
-    li.appendChild(del);
+    li.appendChild(delBtn);
     taskList.appendChild(li);
   });
 }
 
-
-addTaskBtn.addEventListener("click", () => {
+// Add task
+addTaskBtn.addEventListener("click", async () => {
   const text = taskInput.value.trim();
   if (!text) return;
 
-  const { users, tasks } = getTasksRef();
+  const user = auth.currentUser;
+  const userRef = db.collection("users").doc(user.email);
+  const doc = await userRef.get();
+  const data = doc.data();
+
+  const tasks = data.projects[currentProject] || [];
   tasks.push({ text, completed: false });
-  saveUsers(users);
+
+  data.projects[currentProject] = tasks;
+  await userRef.set(data);
 
   taskInput.value = "";
-  loadTasks();
+  loadTasks(user);
 });
 
-
-logoutBtn.addEventListener("click", () => {
-  localStorage.removeItem("currentUser");
+// Logout
+logoutBtn.addEventListener("click", async () => {
+  await auth.signOut();
   window.location.href = "login.html";
 });
-
-loadTasks();
